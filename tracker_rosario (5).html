@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rosario — Tracker de Reservas</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;color:#1a1a1a;background:#f5f5f0;min-height:100vh}
+.app{max-width:1300px;margin:0 auto;padding:1.25rem 1rem}
+.hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:10px}
+.ttl{font-size:21px;font-weight:700;color:#111}
+.sub{font-size:12px;color:#999;margin-top:3px}
+.btn-row{display:flex;gap:8px}
+.btn{height:34px;padding:0 14px;border:1px solid #ccc;border-radius:8px;background:#fff;color:#333;cursor:pointer;font-size:13px;font-weight:500}
+.btn:hover{background:#f0efe8}
+.btn.pri{background:#1a5fa8;color:#fff;border-color:#1a5fa8}
+.btn.pri:hover{background:#154d8c}
+.btn.sm{height:26px;padding:0 9px;font-size:11px}
+.tabs{display:flex;gap:2px;background:#e0dfd8;padding:3px;border-radius:10px;margin-bottom:1.25rem;width:fit-content}
+.tab{padding:6px 15px;border:none;background:transparent;cursor:pointer;border-radius:7px;font-size:13px;color:#666;font-weight:500}
+.tab.on{background:#fff;color:#111;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.mets{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:1.25rem}
+.mc{background:#fff;border-radius:10px;padding:12px 14px;border:1px solid #e8e8e0}
+.ml{font-size:11px;color:#999;margin-bottom:3px;text-transform:uppercase;letter-spacing:.4px}
+.mv{font-size:22px;font-weight:700}
+.mv.b{color:#1a5fa8}.mv.w{color:#c07000}.mv.g{color:#2d7a3a}.mv.r{color:#b03030}
+.srch-row{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;align-items:center}
+.srch-row input{flex:1;min-width:160px;height:34px;padding:0 10px;border:1px solid #ccc;border-radius:8px;font-size:13px;background:#fff;color:#333}
+.srch-row input:focus{outline:none;border-color:#1a5fa8}
+.srch-row select{height:34px;padding:0 10px;border:1px solid #ccc;border-radius:8px;font-size:13px;background:#fff;color:#333;cursor:pointer}
+.srch-row select:focus{outline:none;border-color:#1a5fa8}
+.srch-row select.active{border-color:#1a5fa8;background:#e8f1fb;color:#1a5fa8;font-weight:600}
+.tw{overflow-x:auto;border-radius:10px;border:1px solid #ddd;background:#fff}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{background:#f8f8f3;padding:9px 11px;text-align:left;font-weight:600;font-size:11px;color:#888;border-bottom:1px solid #eee;white-space:nowrap;text-transform:uppercase;letter-spacing:.3px}
+td{padding:8px 11px;border-bottom:1px solid #f2f2ec;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#fafaf5}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600}
+.bap{background:#e8f5e9;color:#2d7a3a}.bpe{background:#fff3e0;color:#c07000}
+.bre{background:#ffebee;color:#b03030}.bnr{background:#e3f2fd;color:#1565c0}
+.bsi{background:#e8f5e9;color:#2d7a3a}.bno{background:#f5f5f5;color:#777}
+.chip{display:inline-block;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600}
+.cok{background:#e8f5e9;color:#2d7a3a}.cwa{background:#fff3e0;color:#c07000}.cda{background:#ffebee;color:#b03030}
+.ptag{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;background:#ede7f6;color:#4527a0;font-weight:500}
+.opp{font-size:10px;font-family:monospace;color:#bbb}
+.cmt{font-size:11px;color:#888;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rc{margin-top:8px;font-size:11px;color:#aaa}
+.mbg{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:100}
+.modal{background:#fff;border-radius:14px;padding:1.5rem;width:min(460px,92vw);box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal h3{font-size:16px;font-weight:600;margin-bottom:1rem}
+.lbl{font-size:12px;color:#777;display:block;margin-bottom:4px}
+.fc{width:100%;border:1px solid #ccc;border-radius:8px;padding:8px 10px;font-size:13px;font-family:inherit;color:#333;background:#fff;margin-bottom:12px}
+select.fc{height:36px}textarea.fc{height:80px;resize:vertical}
+.mbtns{display:flex;justify-content:flex-end;gap:8px;margin-top:4px}
+.tip{font-size:12px;color:#999;margin-bottom:8px;line-height:1.5}
+.pa{width:100%;height:100px;border:1px solid #ccc;border-radius:8px;padding:8px;font-size:11px;font-family:monospace;background:#f9f9f5;color:#333;resize:vertical;margin-bottom:8px}
+.empty{text-align:center;padding:3rem;color:#bbb}
+.today{display:inline-block;background:#e3f2fd;color:#1565c0;border-radius:6px;padding:2px 8px;font-size:11px;margin-left:8px}
+.hl{background:#fffbf0}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="hdr">
+  <div>
+    <div class="ttl">🏬 El Rosario Town Center <span class="today" id="hoy"></span></div>
+    <div class="sub">Tracker dedicado — solo reservas de Rosario</div>
+  </div>
+  <div class="btn-row">
+    <button class="btn" onclick="openImp()">📥 Cargar datos</button>
+    <button class="btn pri" onclick="doExport()">📤 Exportar</button>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab on" onclick="setTab('dec')">⏳ Por declarar</button>
+  <button class="tab" onclick="setTab('ent')">🚗 Por entregar</button>
+  <button class="tab" onclick="setTab('hist')">📋 Declaradas</button>
+  <button class="tab" onclick="setTab('all')">🔍 Todas</button>
+</div>
+
+<div class="mets" id="mets"></div>
+
+<div class="srch-row">
+  <input type="text" id="srch" placeholder="Buscar Opp ID, Stock, Coordenada..." oninput="render()">
+  <select id="fpag" onchange="updateSelStyle(this);render()">
+    <option value="">💳 Pago: Todos</option>
+    <option value="Financiamiento">Financiamiento</option>
+    <option value="Pago de Contado">Contado</option>
+  </select>
+  <select id="fsan" onchange="updateSelStyle(this);render()">
+    <option value="">🏷 Sanity: Todos</option>
+    <option value="Aprobado">Aprobado</option>
+    <option value="Pendiente">Pendiente</option>
+    <option value="Rechazado">Rechazado</option>
+    <option value="No requerido">No requerido</option>
+  </select>
+  <select id="fent" onchange="updateSelStyle(this);render()"><option value="">📅 Entrega: Todas</option></select>
+  <select id="fproc" onchange="updateSelStyle(this);render()">
+    <option value="">⚙️ Proceso: Todos</option>
+    <option value="Esperando pago">Esperando pago</option>
+    <option value="En proceso de declaración">En proceso de declaración</option>
+    <option value="Declaración completada">Declaración completada</option>
+    <option value="Pendiente R4D mecánica">Pendiente R4D mecánica</option>
+    <option value="Pendiente R4D legal">Pendiente R4D legal</option>
+    <option value="Listo para entrega">Listo para entrega</option>
+    <option value="Entrega agendada">Entrega agendada</option>
+    <option value="Entregado">Entregado</option>
+    <option value="Cancelado">Cancelado</option>
+    <option value="Rechazado — en revisión">Rechazado — en revisión</option>
+  </select>
+  <button class="btn" onclick="clrFiltros()">✕ Limpiar</button>
+</div>
+
+<div class="tw"><table><thead id="th"></thead><tbody id="tb"></tbody></table></div>
+<div class="rc" id="rc"></div>
+</div>
+
+<!-- Modal importar -->
+<div id="impM" style="display:none" class="mbg">
+<div class="modal">
+  <h3>📥 Cargar datos del día</h3>
+  <p class="tip">Ctrl+A en tu Sheet → Ctrl+C → pega aquí. Solo se guardarán las reservas de Rosario.</p>
+  <textarea class="pa" id="pasteA" placeholder="Pega los datos de tu Google Sheet..."></textarea>
+  <div class="mbtns">
+    <button class="btn" onclick="closeImp()">Cancelar</button>
+    <button class="btn pri" onclick="doImport()">Importar</button>
+  </div>
+</div>
+</div>
+
+<!-- Modal nota -->
+<div id="comM" style="display:none" class="mbg">
+<div class="modal">
+  <h3>✏️ Nota de reserva</h3>
+  <div style="background:#f8f8f3;border-radius:8px;padding:10px;margin-bottom:14px;font-size:12px">
+    <span style="color:#999">Opp: </span><span id="cOpp" style="font-family:monospace;font-size:11px"></span><br>
+    <span style="color:#999">Stock: </span><span id="cStock" style="font-weight:700"></span>
+    <span style="color:#999;margin-left:10px">Fecha: </span><span id="cFecha"></span>
+  </div>
+  <label class="lbl">Estado del proceso</label>
+  <select class="fc" id="procSel">
+    <option value="">— Sin etiqueta —</option>
+    <option>Esperando pago</option>
+    <option>En proceso de declaración</option>
+    <option>Declaración completada</option>
+    <option>Pendiente R4D mecánica</option>
+    <option>Pendiente R4D legal</option>
+    <option>Listo para entrega</option>
+    <option>Entrega agendada</option>
+    <option>Entregado</option>
+    <option>Cancelado</option>
+    <option>Rechazado — en revisión</option>
+  </select>
+  <label class="lbl">Comentario</label>
+  <textarea class="fc" id="comTxt" placeholder="Notas sobre esta reserva..."></textarea>
+  <div class="mbtns">
+    <button class="btn" onclick="closeCom()">Cancelar</button>
+    <button class="btn pri" onclick="saveCom()">Guardar</button>
+  </div>
+</div>
+</div>
+
+<script>
+const SEED = [{"opp": "006Pb00001Ic1zWIAR", "stock": "486641", "fecha": "8/04/2026", "loc": "CDMX - EL ROSARIO TOWN CENTER", "coord": "D-19", "pago": "Pago de Contado", "decl": "Si", "fechaSO": "8/04/2026", "agR": 0, "entAg": "Si", "fechaEnt": "9/04/2026", "agE": "1", "r4m": "", "r4l": "R4D", "san": "Aprobado"}, {"opp": "006Pb00001IcqSaIAJ", "stock": "494420", "fecha": "8/04/2026", "loc": "CDMX - EL ROSARIO TOWN CENTER", "coord": "D-37", "pago": "Financiamiento", "decl": "No", "fechaSO": "", "agR": 1, "entAg": "No", "fechaEnt": "", "agE": "", "r4m": "R4D", "r4l": "R4D", "san": "Pendiente"}, {"opp": "006Pb00001Hn6raIAB", "stock": "485154", "fecha": "8/04/2026", "loc": "CDMX - EL ROSARIO TOWN CENTER", "coord": "A-64", "pago": "Pago de Contado", "decl": "Si", "fechaSO": "8/04/2026", "agR": 0, "entAg": "Si", "fechaEnt": "12/04/2026", "agE": "1", "r4m": "4", "r4l": "R4D", "san": "Pendiente"}, {"opp": "006Pb00001IbkNZIAZ", "stock": "497546", "fecha": "8/04/2026", "loc": "CDMX - EL ROSARIO TOWN CENTER", "coord": "D-14", "pago": "Pago de Contado", "decl": "No", "fechaSO": "", "agR": 1, "entAg": "No", "fechaEnt": "", "agE": "", "r4m": "R4D", "r4l": "R4D", "san": "Aprobado"}, {"opp": "006Pb00001IJGHYIA5", "stock": "487944", "fecha": "6/04/2026", "loc": "CDMX - EL ROSARIO TOWN CENTER", "coord": "E-14", "pago": "Pago de Contado", "decl": "Si", "fechaSO": "7/04/2026", "agR": 1, "entAg": "No", "fechaEnt": "", "agE": "2", "r4m": "R4D", "r4l": "R4D", "san": "No requerido"}, {"opp": "006Pb00001ITwliIAD", "stock": "499691", "fecha": "8/04/2026", "loc": "CDMX - EL ROSARIO TOWN CENTER", "coord": "D-32", "pago": "Pago de Contado", "decl": "No", "fechaSO": "", "agR": 1, "entAg": "No", "fechaEnt": "", "agE": "", "r4m": "R4D", "r4l": "7", "san": "Pendiente"}, {"opp": "006Pb00001IRH3VIAX", "stock": "484883", "fecha": "7/04/2026", "loc": "CDMX - EL ROSARIO TOWN CENTER", "coord": "GPS", "pago": "Financiamiento", "decl": "Si", "fechaSO": "8/04/2026", "agR": 1, "entAg": "Si", "fechaEnt": "10/04/2026", "agE": "1", "r4m": "R4D", "r4l": "R4D", "san": "Aprobado"}, {"opp": "006Pb00001IFcWjIAL", "stock": "483116", "fecha": "6/04/2026", "loc": "CDMX - EL ROSARIO TOWN CENTER", "coord": "GPS", "pago": "Financiamiento", "decl": "Si", "fechaSO": "7/04/2026", "agR": 1, "entAg": "No", "fechaEnt": "", "agE": "2", "r4m": "", "r4l": "7", "san": "Aprobado"}, {"opp": "006Pb00001Hw73dIAB", "stock": "445505", "fecha": "7/04/2026", "loc": "CDMX - EL ROSARIO TOWN CENTER", "coord": "GPS", "pago": "Financiamiento", "decl": "Si", "fechaSO": "8/04/2026", "agR": 1, "entAg": "Si", "fechaEnt": "11/04/2026", "agE": "1", "r4m": "R4D", "r4l": "R4D", "san": "Aprobado"}, {"opp": "006Pb00001I1iaPIAR", "stock": "497111", "fecha": "3/04/2026", "loc": "CDMX - EL ROSARIO TOWN CENTER", "coord": "B-47", "pago": "Pago de Contado", "decl": "Si", "fechaSO": "7/04/2026", "agR": 4, "entAg": "No", "fechaEnt": "", "agE": "2", "r4m": "R4D", "r4l": "R4D", "san": "Aprobado"}, {"opp": "006Pb00001IOtwYIAT", "stock": "490158", "fecha": "7/04/2026", "loc": "CDMX - EL ROSARIO TOWN CENTER", "coord": "GPS", "pago": "Financiamiento", "decl": "Si", "fechaSO": "7/04/2026", "agR": 0, "entAg": "Si", "fechaEnt": "10/04/2026", "agE": "2", "r4m": "R4D", "r4l": "R4D", "san": "Aprobado"}, {"opp": "006Pb00001IammPIAR", "stock": "466911", "fecha": "8/04/2026", "loc": "CDMX - EL ROSARIO TOWN CENTER", "coord": "A-28", "pago": "Financiamiento", "decl": "No", "fechaSO": "", "agR": 1, "entAg": "No", "fechaEnt": "", "agE": "", "r4m": "R4D", "r4l": "R4D", "san": "Aprobado"}, {"opp": "006Pb00001HjNMNIA3", "stock": "487295", "fecha": "8/04/2026", "loc": "CDMX - EL ROSARIO TOWN CENTER", "coord": "D-73", "pago": "Financiamiento", "decl": "No", "fechaSO": "", "agR": 1, "entAg": "No", "fechaEnt": "", "agE": "", "r4m": "", "r4l": "R4D", "san": "Pendiente"}, {"opp": "006Pb00001IY7DvIAL", "stock": "492462", "fecha": "8/04/2026", "loc": "CDMX - EL ROSARIO TOWN CENTER", "coord": "B-59", "pago": "Financiamiento", "decl": "No", "fechaSO": "", "agR": 1, "entAg": "No", "fechaEnt": "", "agE": "", "r4m": "R4D", "r4l": "R4D", "san": "Aprobado"}, {"opp": "006Pb00001GzxnrIAB", "stock": "490691", "fecha": "28/03/2026", "loc": "CDMX - EL ROSARIO TOWN CENTER", "coord": "Detallado", "pago": "Financiamiento", "decl": "Si", "fechaSO": "31/03/2026", "agR": 3, "entAg": "No", "fechaEnt": "", "agE": "9", "r4m": "4", "r4l": "R4D", "san": "Rechazado"}, {"opp": "006Pb00001I05w5IAB", "stock": "494731", "fecha": "4/04/2026", "loc": "CDMX - EL ROSARIO TOWN CENTER", "coord": "D-79", "pago": "Pago de Contado", "decl": "Si", "fechaSO": "8/04/2026", "agR": 4, "entAg": "Si", "fechaEnt": "9/04/2026", "agE": "1", "r4m": "R4D", "r4l": "R4D", "san": "Aprobado"}, {"opp": "006Pb00001IYMHmIAP", "stock": "470955", "fecha": "8/04/2026", "loc": "CDMX - EL ROSARIO TOWN CENTER", "coord": "PRE ENTREGAS 1", "pago": "Financiamiento", "decl": "No", "fechaSO": "", "agR": 1, "entAg": "No", "fechaEnt": "", "agE": "", "r4m": "R4D", "r4l": "R4D", "san": "Aprobado"}, {"opp": "006Pb00001GnVLtIAN", "stock": "470648", "fecha": "25/03/2026", "loc": "CDMX - EL ROSARIO TOWN CENTER", "coord": "AREADECHECKS", "pago": "Financiamiento", "decl": "Si", "fechaSO": "25/03/2026", "agR": 0, "entAg": "No", "fechaEnt": "", "agE": "15", "r4m": "R4D", "r4l": "R4D", "san": "Aprobado"}, {"opp": "006Pb00001I5UdhIAF", "stock": "486633", "fecha": "4/04/2026", "loc": "CDMX - EL ROSARIO TOWN CENTER", "coord": "Detallado", "pago": "Financiamiento", "decl": "Si", "fechaSO": "7/04/2026", "agR": 3, "entAg": "Si", "fechaEnt": "9/04/2026", "agE": "2", "r4m": "", "r4l": "R4D", "san": "Aprobado"}, {"opp": "006Pb00001GfVuAIAV", "stock": "496884", "fecha": "24/03/2026", "loc": "CDMX - EL ROSARIO TOWN CENTER", "coord": "Detallado", "pago": "Pago de Contado", "decl": "Si", "fechaSO": "31/03/2026", "agR": 7, "entAg": "No", "fechaEnt": "", "agE": "9", "r4m": "R4D", "r4l": "7", "san": "Rechazado"}, {"opp": "006Pb00001IT5uJIAT", "stock": "498081", "fecha": "7/04/2026", "loc": "CDMX - EL ROSARIO TOWN CENTER", "coord": "E-10", "pago": "Pago de Contado", "decl": "No", "fechaSO": "", "agR": 2, "entAg": "No", "fechaEnt": "", "agE": "", "r4m": "R4D", "r4l": "R4D", "san": "No requerido"}, {"opp": "006Pb00001Hhp3OIAR", "stock": "493913", "fecha": "3/04/2026", "loc": "CDMX - EL ROSARIO TOWN CENTER", "coord": "Detallado", "pago": "Financiamiento", "decl": "Si", "fechaSO": "5/04/2026", "agR": 2, "entAg": "Si", "fechaEnt": "11/04/2026", "agE": "4", "r4m": "4", "r4l": "4", "san": "Aprobado"}, {"opp": "006Pb00001INVt3IAH", "stock": "496974", "fecha": "7/04/2026", "loc": "CDMX - EL ROSARIO TOWN CENTER", "coord": "D-47", "pago": "Pago de Contado", "decl": "No", "fechaSO": "", "agR": 2, "entAg": "No", "fechaEnt": "", "agE": "", "r4m": "R4D", "r4l": "R4D", "san": "Aprobado"}, {"opp": "006Pb00001IQSFWIA5", "stock": "498211", "fecha": "7/04/2026", "loc": "CDMX - EL ROSARIO TOWN CENTER", "coord": "B-76", "pago": "Pago de Contado", "decl": "No", "fechaSO": "", "agR": 2, "entAg": "No", "fechaEnt": "", "agE": "", "r4m": "R4D", "r4l": "R4D", "san": "Aprobado"}, {"opp": "006Pb00001HsOsgIAF", "stock": "493192", "fecha": "2/04/2026", "loc": "CDMX - EL ROSARIO TOWN CENTER", "coord": "ENTREGAS", "pago": "Financiamiento", "decl": "Si", "fechaSO": "5/04/2026", "agR": 3, "entAg": "Si", "fechaEnt": "9/04/2026", "agE": "4", "r4m": "R4D", "r4l": "4", "san": "Rechazado"}, {"opp": "006Pb00001IRdFJIA1", "stock": "498380", "fecha": "7/04/2026", "loc": "CDMX - EL ROSARIO TOWN CENTER", "coord": "D-36", "pago": "Pago de Contado", "decl": "No", "fechaSO": "", "agR": 2, "entAg": "Si", "fechaEnt": "11/04/2026", "agE": "", "r4m": "R4D", "r4l": "7", "san": "Aprobado"}, {"opp": "006Pb00001HrfdpIAB", "stock": "496832", "fecha": "2/04/2026", "loc": "CDMX - EL ROSARIO TOWN CENTER", "coord": "GPS", "pago": "Financiamiento", "decl": "Si", "fechaSO": "8/04/2026", "agR": 6, "entAg": "Si", "fechaEnt": "13/04/2026", "agE": "1", "r4m": "R4D", "r4l": "4", "san": "Rechazado"}, {"opp": "006Pb00001HrTG5IAN", "stock": "496915", "fecha": "2/04/2026", "loc": "CDMX - EL ROSARIO TOWN CENTER", "coord": "GPS", "pago": "Financiamiento", "decl": "Si", "fechaSO": "8/04/2026", "agR": 6, "entAg": "Si", "fechaEnt": "11/04/2026", "agE": "1", "r4m": "R4D", "r4l": "R4D", "san": "Aprobado"}, {"opp": "006Pb00001IRMhVIAX", "stock": "493703", "fecha": "7/04/2026", "loc": "CDMX - EL ROSARIO TOWN CENTER", "coord": "B-129", "pago": "Financiamiento", "decl": "No", "fechaSO": "", "agR": 2, "entAg": "No", "fechaEnt": "", "agE": "", "r4m": "R4D", "r4l": "R4D", "san": "Aprobado"}, {"opp": "006Pb00001GXZrhIAH", "stock": "496093", "fecha": "1/04/2026", "loc": "CDMX - EL ROSARIO TOWN CENTER", "coord": "E-33", "pago": "Financiamiento", "decl": "No", "fechaSO": "", "agR": 8, "entAg": "No", "fechaEnt": "", "agE": "", "r4m": "R4D", "r4l": "4", "san": "Aprobado"}, {"opp": "006Pb00001HaOfqIAF", "stock": "475578", "fecha": "1/04/2026", "loc": "CDMX - EL ROSARIO TOWN CENTER", "coord": "D-61", "pago": "Financiamiento", "decl": "Si", "fechaSO": "4/04/2026", "agR": 3, "entAg": "Si", "fechaEnt": "9/04/2026", "agE": "5", "r4m": "4", "r4l": "30", "san": "Rechazado"}, {"opp": "006Pb00001HX5UtIAL", "stock": "489036", "fecha": "31/03/2026", "loc": "CDMX - EL ROSARIO TOWN CENTER", "coord": "A-52", "pago": "Financiamiento", "decl": "Si", "fechaSO": "6/04/2026", "agR": 6, "entAg": "Si", "fechaEnt": "16/04/2026", "agE": "3", "r4m": "R4D", "r4l": "R4D", "san": "Aprobado"}, {"opp": "006Pb00001IJa3NIAT", "stock": "480852", "fecha": "6/04/2026", "loc": "CDMX - EL ROSARIO TOWN CENTER", "coord": "Detallado", "pago": "Pago de Contado", "decl": "Si", "fechaSO": "7/04/2026", "agR": 1, "entAg": "Si", "fechaEnt": "9/04/2026", "agE": "2", "r4m": "4", "r4l": "R4D", "san": "Aprobado"}, {"opp": "006Pb00001GkHPAIA3", "stock": "487553", "fecha": "30/03/2026", "loc": "CDMX - EL ROSARIO TOWN CENTER", "coord": "D-59", "pago": "Pago de Contado", "decl": "Si", "fechaSO": "7/04/2026", "agR": 8, "entAg": "Si", "fechaEnt": "9/04/2026", "agE": "2", "r4m": "R4D", "r4l": "R4D", "san": "Aprobado"}, {"opp": "006Pb00001HC2gWIAT", "stock": "491726", "fecha": "28/03/2026", "loc": "CDMX - EL ROSARIO TOWN CENTER", "coord": "ENTREGACLIENTE", "pago": "Financiamiento", "decl": "Si", "fechaSO": "7/04/2026", "agR": 10, "entAg": "Si", "fechaEnt": "9/04/2026", "agE": "2", "r4m": "R4D", "r4l": "R4D", "san": "Aprobado"}, {"opp": "006Pb00001H31mrIAB", "stock": "494604", "fecha": "28/03/2026", "loc": "CDMX - EL ROSARIO TOWN CENTER", "coord": "E-30", "pago": "Financiamiento", "decl": "Si", "fechaSO": "3/04/2026", "agR": 6, "entAg": "Si", "fechaEnt": "13/04/2026", "agE": "6", "r4m": "4", "r4l": "10", "san": "Rechazado"}, {"opp": "006Pb00001IHkQ9IAL", "stock": "498227", "fecha": "6/04/2026", "loc": "CDMX - EL ROSARIO TOWN CENTER", "coord": "E-81", "pago": "Financiamiento", "decl": "No", "fechaSO": "", "agR": 3, "entAg": "No", "fechaEnt": "", "agE": "", "r4m": "R4D", "r4l": "7", "san": "Rechazado"}, {"opp": "006Pb00001FqvaXIAR", "stock": "487135", "fecha": "27/03/2026", "loc": "CDMX - EL ROSARIO TOWN CENTER", "coord": "ENTREGAS", "pago": "Financiamiento", "decl": "Si", "fechaSO": "31/03/2026", "agR": 4, "entAg": "Si", "fechaEnt": "11/04/2026", "agE": "9", "r4m": "R4D", "r4l": "R4D", "san": "Aprobado"}, {"opp": "006Pb00001I8yDpIAJ", "stock": "498645", "fecha": "6/04/2026", "loc": "CDMX - EL ROSARIO TOWN CENTER", "coord": "B-31", "pago": "Financiamiento", "decl": "No", "fechaSO": "", "agR": 3, "entAg": "No", "fechaEnt": "", "agE": "", "r4m": "R4D", "r4l": "R4D", "san": "Aprobado"}, {"opp": "006Pb00001IFW4lIAH", "stock": "492896", "fecha": "6/04/2026", "loc": "CDMX - EL ROSARIO TOWN CENTER", "coord": "D-81", "pago": "Pago de Contado", "decl": "No", "fechaSO": "", "agR": 3, "entAg": "No", "fechaEnt": "", "agE": "", "r4m": "", "r4l": "R4D", "san": "Aprobado"}, {"opp": "006Pb00001IFvj3IAD", "stock": "489068", "fecha": "6/04/2026", "loc": "CDMX - EL ROSARIO TOWN CENTER", "coord": "B-05", "pago": "Pago de Contado", "decl": "No", "fechaSO": "", "agR": 3, "entAg": "No", "fechaEnt": "", "agE": "", "r4m": "R4D", "r4l": "45", "san": "No requerido"}, {"opp": "006Pb00001Gad9DIAR", "stock": "433966", "fecha": "24/03/2026", "loc": "CDMX - EL ROSARIO TOWN CENTER", "coord": "B-19", "pago": "Pago de Contado", "decl": "No", "fechaSO": "", "agR": 16, "entAg": "No", "fechaEnt": "", "agE": "", "r4m": "R4D", "r4l": "R4D", "san": "No requerido"}, {"opp": "006Pb00001GqWzlIAF", "stock": "489216", "fecha": "4/04/2026", "loc": "CDMX - EL ROSARIO TOWN CENTER", "coord": "TALLER ROSARIO", "pago": "Pago de Contado", "decl": "No", "fechaSO": "", "agR": 5, "entAg": "No", "fechaEnt": "", "agE": "", "r4m": "R4D", "r4l": "7", "san": "Aprobado"}, {"opp": "006Pb00001I5aOAIAZ", "stock": "500052", "fecha": "4/04/2026", "loc": "CDMX - EL ROSARIO TOWN CENTER", "coord": "INSPECCION", "pago": "Pago de Contado", "decl": "No", "fechaSO": "", "agR": 5, "entAg": "No", "fechaEnt": "", "agE": "", "r4m": "15", "r4l": "R4D", "san": "No requerido"}, {"opp": "006Pb00001HtZndIAF", "stock": "487014", "fecha": "3/04/2026", "loc": "CDMX - EL ROSARIO TOWN CENTER", "coord": "Detallado", "pago": "Financiamiento", "decl": "Si", "fechaSO": "7/04/2026", "agR": 4, "entAg": "Si", "fechaEnt": "10/04/2026", "agE": "2", "r4m": "4", "r4l": "R4D", "san": "Rechazado"}, {"opp": "006Pb00001HvkwgIAB", "stock": "496581", "fecha": "3/04/2026", "loc": "CDMX - EL ROSARIO TOWN CENTER", "coord": "B-68", "pago": "Financiamiento", "decl": "No", "fechaSO": "", "agR": 6, "entAg": "No", "fechaEnt": "", "agE": "", "r4m": "R4D", "r4l": "R4D", "san": "Aprobado"}, {"opp": "006Pb00001Hy9qwIAB", "stock": "490456", "fecha": "3/04/2026", "loc": "CDMX - EL ROSARIO TOWN CENTER", "coord": "B-58", "pago": "Financiamiento", "decl": "No", "fechaSO": "", "agR": 6, "entAg": "No", "fechaEnt": "", "agE": "", "r4m": "R4D", "r4l": "4", "san": "Rechazado"}, {"opp": "006Pb00001HE6CxIAL", "stock": "489185", "fecha": "2/04/2026", "loc": "CDMX - EL ROSARIO TOWN CENTER", "coord": "CONTENIDO", "pago": "Financiamiento", "decl": "No", "fechaSO": "", "agR": 7, "entAg": "No", "fechaEnt": "", "agE": "", "r4m": "R4D", "r4l": "R4D", "san": "Aprobado"}, {"opp": "006Pb00001HsBYsIAN", "stock": "494406", "fecha": "2/04/2026", "loc": "CDMX - EL ROSARIO TOWN CENTER", "coord": "D-83", "pago": "Financiamiento", "decl": "No", "fechaSO": "", "agR": 7, "entAg": "No", "fechaEnt": "", "agE": "", "r4m": "R4D", "r4l": "30", "san": "Aprobado"}, {"opp": "006Pb00001HYLxOIAX", "stock": "469299", "fecha": "31/03/2026", "loc": "CDMX - EL ROSARIO TOWN CENTER", "coord": "D-76", "pago": "Pago de Contado", "decl": "No", "fechaSO": "", "agR": 9, "entAg": "No", "fechaEnt": "", "agE": "", "r4m": "R4D", "r4l": "R4D", "san": "No requerido"}, {"opp": "006Pb00001HGPUnIAP", "stock": "495640", "fecha": "29/03/2026", "loc": "CDMX - EL ROSARIO TOWN CENTER", "coord": "E-09", "pago": "Financiamiento", "decl": "No", "fechaSO": "", "agR": 11, "entAg": "No", "fechaEnt": "", "agE": "", "r4m": "R4D", "r4l": "R4D", "san": "Aprobado"}, {"opp": "006Pb00001HDEnfIAH", "stock": "492246", "fecha": "28/03/2026", "loc": "CDMX - EL ROSARIO TOWN CENTER", "coord": "B-49", "pago": "Financiamiento", "decl": "Si", "fechaSO": "6/04/2026", "agR": 9, "entAg": "No", "fechaEnt": "", "agE": "3", "r4m": "R4D", "r4l": "7", "san": "Rechazado"}, {"opp": "006Pb00001GJHUrIAP", "stock": "490808", "fecha": "28/03/2026", "loc": "CDMX - EL ROSARIO TOWN CENTER", "coord": "B-53", "pago": "Financiamiento", "decl": "No", "fechaSO": "", "agR": 12, "entAg": "No", "fechaEnt": "", "agE": "", "r4m": "R4D", "r4l": "R4D", "san": "Aprobado"}];
+
+let recs = [];
+let meta = {};
+let tab = 'dec';
+let editOpp = null;
+
+try { meta = JSON.parse(localStorage.getItem('ros_meta') || '{}'); } catch(e) {}
+
+document.getElementById('hoy').textContent = new Date().toLocaleDateString('es-MX',{weekday:'short',day:'numeric',month:'short'});
+
+function parseRaw(raw) {
+  const out = [], seen = new Set();
+  for (const line of raw.split('\n')) {
+    const cols = line.split('\t');
+    let si = 0;
+    while (si < cols.length) {
+      const idx = cols.findIndex((c,i) => i>=si && c && c.trim().startsWith('006Pb'));
+      if (idx < 0) break;
+      const c = cols.slice(idx);
+      if (c.length >= 18) {
+        const opp = c[0].trim();
+        const loc = c[5] || '';
+        if (opp && !seen.has(opp) && loc.toUpperCase().includes('ROSARIO')) {
+          seen.add(opp);
+          out.push({
+            opp, stock: c[1]||'',
+            fecha: (c[3]||c[2]||'').trim(),
+            loc: loc.trim(), coord: c[6]||'',
+            pago: c[7]||'',
+            decl: (c[10]||'No').trim(),
+            fechaSO: c[11]||'',
+            agR: isNaN(parseInt(c[12])) ? 0 : parseInt(c[12]),
+            entAg: (c[13]||'No').trim(),
+            fechaEnt: c[14]||'',
+            agE: c[15]||'',
+            r4m: c[16]||'', r4l: c[17]||'',
+            san: (c[18]||'').trim()
+          });
+        }
+      }
+      si = idx + 19;
+    }
+  }
+  return out;
+}
+
+function view() {
+  if (tab==='dec')  return recs.filter(r=>r.decl==='No');
+  if (tab==='ent')  return recs.filter(r=>r.decl==='Si'&&r.entAg==='Si');
+  if (tab==='hist') return recs.filter(r=>r.decl==='Si');
+  return recs;
+}
+
+// Formatea fecha "d/mm/yyyy" → "d/mm/yyyy" normalizada para comparar
+function fmtDate(d) {
+  // recibe un Date, devuelve "9/04/2026" o "11/04/2026" igual que los datos
+  return `${d.getDate()}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+}
+
+// Rellena el select de entrega con fechas dinámicas al cargar
+function buildEntSelect() {
+  const now = new Date();
+  const hoy = fmtDate(now);
+  const manD = new Date(now); manD.setDate(now.getDate()+1);
+  const man = fmtDate(manD);
+  const semana = [];
+  for (let i=0; i<7; i++) { const d=new Date(now); d.setDate(now.getDate()+i); semana.push(fmtDate(d)); }
+  const sel = document.getElementById('fent');
+  sel.innerHTML = `
+    <option value="">📅 Entrega: Todas</option>
+    <option value="con">Con fecha agendada</option>
+    <option value="sin">Sin fecha</option>
+    <option value="hoy">Entrega hoy (${hoy})</option>
+    <option value="man">Entrega mañana (${man})</option>
+    <option value="semana">Esta semana</option>`;
+  sel._hoy = hoy;
+  sel._man = man;
+  sel._semana = semana;
+}
+
+function filtered() {
+  const q     = document.getElementById('srch').value.toLowerCase();
+  const fpag  = document.getElementById('fpag').value;
+  const fsan  = document.getElementById('fsan').value;
+  const fent  = document.getElementById('fent');
+  const fentV = fent.value;
+  const fproc = document.getElementById('fproc').value;
+  let v = view();
+  if (q)    v = v.filter(r => (r.opp+r.stock+r.coord+r.pago).toLowerCase().includes(q));
+  if (fpag) v = v.filter(r => r.pago === fpag);
+  if (fsan) v = v.filter(r => r.san === fsan);
+  if (fentV === 'con')    v = v.filter(r => r.fechaEnt && r.fechaEnt.trim());
+  if (fentV === 'sin')    v = v.filter(r => !r.fechaEnt || !r.fechaEnt.trim());
+  if (fentV === 'hoy')    v = v.filter(r => r.fechaEnt === fent._hoy);
+  if (fentV === 'man')    v = v.filter(r => r.fechaEnt === fent._man);
+  if (fentV === 'semana') v = v.filter(r => (fent._semana||[]).includes(r.fechaEnt));
+  if (fproc) v = v.filter(r => (meta[r.opp]||{}).proc === fproc);
+  return v;
+}
+
+function updateSelStyle(sel) {
+  sel.classList.toggle('active', sel.value !== '');
+}
+
+function clrFiltros() {
+  document.getElementById('srch').value = '';
+  ['fpag','fsan','fent','fproc'].forEach(id => {
+    const el = document.getElementById(id);
+    el.value = '';
+    el.classList.remove('active');
+  });
+  render();
+}
+
+function chip(n) {
+  if (n===''||n===null||n===undefined) return '<span style="color:#ccc">—</span>';
+  const ni = parseInt(n);
+  const cls = ni<=2?'cok':ni<=5?'cwa':'cda';
+  return `<span class="chip ${cls}">${n}d</span>`;
+}
+function sb(s) {
+  const m={Aprobado:'bap',Pendiente:'bpe',Rechazado:'bre','No requerido':'bnr'};
+  return `<span class="badge ${m[s]||'bpe'}">${s||'—'}</span>`;
+}
+function db(d) {
+  return d==='Si'?'<span class="badge bsi">✓ Sí</span>':'<span class="badge bno">✗ No</span>';
+}
+
+function drawMets() {
+  const sd = recs.filter(r=>r.decl==='No').length;
+  const pe = recs.filter(r=>r.decl==='Si'&&r.entAg==='Si').length;
+  const re = recs.filter(r=>r.san==='Rechazado').length;
+  const ag = recs.filter(r=>r.agR>5).length;
+  document.getElementById('mets').innerHTML = `
+    <div class="mc"><div class="ml">Total Rosario</div><div class="mv b">${recs.length}</div></div>
+    <div class="mc"><div class="ml">Por declarar</div><div class="mv w">${sd}</div></div>
+    <div class="mc"><div class="ml">Por entregar</div><div class="mv g">${pe}</div></div>
+    <div class="mc"><div class="ml">Rechazados</div><div class="mv r">${re}</div></div>
+    <div class="mc"><div class="ml">Aging &gt;5d</div><div class="mv ${ag>0?'r':'g'}">${ag}</div></div>`;
+}
+
+function render() {
+  drawMets();
+  const v = filtered();
+  document.getElementById('rc').textContent = `Mostrando ${v.length} de ${recs.length} reservas de Rosario`;
+  const showEnt = tab==='ent'||tab==='hist'||tab==='all';
+  document.getElementById('th').innerHTML = `<tr>
+    <th>Opp ID</th><th>Stock</th><th>Fecha</th><th>Coord.</th>
+    <th>Pago</th><th>Decl.</th><th>Aging R</th>
+    ${showEnt?'<th>Fecha Ent.</th><th>Aging E</th>':''}
+    <th>R4D M</th><th>R4D L</th><th>Sanity</th><th>Proceso</th><th>Comentario</th><th></th></tr>`;
+  if (!v.length) {
+    document.getElementById('tb').innerHTML='<tr><td colspan="15" class="empty">Sin registros en esta vista</td></tr>';
+    return;
+  }
+  document.getElementById('tb').innerHTML = v.map(r => {
+    const m = meta[r.opp]||{};
+    return `<tr class="${r.agR>5?'hl':''}">
+      <td><div class="opp">${r.opp}</div></td>
+      <td><strong>${r.stock}</strong></td>
+      <td style="white-space:nowrap;font-size:11px">${r.fecha}</td>
+      <td style="font-size:11px;color:#999">${r.coord||'—'}</td>
+      <td style="font-size:11px">${r.pago==='Financiamiento'?'Financ.':'Contado'}</td>
+      <td>${db(r.decl)}</td>
+      <td>${chip(r.agR)}</td>
+      ${showEnt?`<td style="white-space:nowrap;font-size:11px;font-weight:${r.fechaEnt?600:400}">${r.fechaEnt||'—'}</td><td>${chip(r.agE)}</td>`:''}
+      <td style="font-size:11px;color:#999">${r.r4m||'—'}</td>
+      <td style="font-size:11px;color:#999">${r.r4l||'—'}</td>
+      <td>${sb(r.san)}</td>
+      <td>${m.proc?`<span class="ptag">${m.proc}</span>`:'<span style="color:#ddd;font-size:11px">—</span>'}</td>
+      <td><div class="cmt" title="${(m.com||'').replace(/"/g,'&quot;')}">${m.com||'<span style="color:#ddd">Sin nota</span>'}</div></td>
+      <td><button class="btn sm" onclick="openCom('${r.opp}')">✏️</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function setTab(t) {
+  tab=t;
+  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('on',['dec','ent','hist','all'][i]===t));
+  render();
+}
+
+function openCom(opp) {
+  editOpp=opp;
+  const r=recs.find(x=>x.opp===opp)||{};
+  const m=meta[opp]||{};
+  document.getElementById('cOpp').textContent=opp;
+  document.getElementById('cStock').textContent=r.stock||'—';
+  document.getElementById('cFecha').textContent=r.fecha||'—';
+  document.getElementById('procSel').value=m.proc||'';
+  document.getElementById('comTxt').value=m.com||'';
+  document.getElementById('comM').style.display='flex';
+}
+function closeCom(){document.getElementById('comM').style.display='none';editOpp=null;}
+function saveCom(){
+  if(!editOpp) return;
+  meta[editOpp]={proc:document.getElementById('procSel').value,com:document.getElementById('comTxt').value};
+  try{localStorage.setItem('ros_meta',JSON.stringify(meta));}catch(e){}
+  closeCom();render();
+}
+
+function openImp(){document.getElementById('pasteA').value='';document.getElementById('impM').style.display='flex';}
+function closeImp(){document.getElementById('impM').style.display='none';}
+function doImport(){
+  const raw=document.getElementById('pasteA').value;
+  if(!raw.trim()){closeImp();return;}
+  const nr=parseRaw(raw);
+  if(!nr.length){alert('No se encontraron reservas de Rosario.\nAsegúrate de copiar con Ctrl+A + Ctrl+C desde tu Sheet.');return;}
+  recs=nr;
+  try{localStorage.setItem('ros_recs',JSON.stringify(recs));}catch(e){}
+  render();closeImp();
+}
+
+function doExport(){
+  const v=filtered();
+  const h='Opp ID,Stock,Fecha,Coordenada,Pago,Declarada,Aging Res,Entrega Agendada,Fecha Entrega,Aging Ent,R4D Mec,R4D Leg,Sanity,Proceso,Comentario';
+  const rows=v.map(r=>{
+    const m=meta[r.opp]||{};
+    return [r.opp,r.stock,r.fecha,r.coord,r.pago,r.decl,r.agR,r.entAg,r.fechaEnt,r.agE,r.r4m,r.r4l,r.san,m.proc||'',m.com||'']
+      .map(x=>`"${String(x).replace(/"/g,'""')}"`)
+      .join(',');
+  });
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(h+'\n'+rows.join('\n'));
+  a.download='rosario_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();
+}
+
+document.getElementById('impM').addEventListener('click',e=>{if(e.target===e.currentTarget)closeImp();});
+document.getElementById('comM').addEventListener('click',e=>{if(e.target===e.currentTarget)closeCom();});
+
+// Init
+try{const s=localStorage.getItem('ros_recs');if(s)recs=JSON.parse(s);}catch(e){}
+if(!recs.length) recs=SEED;
+buildEntSelect();
+render();
+</script>
+</body>
+</html>
